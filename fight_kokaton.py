@@ -52,7 +52,7 @@ class Bird:
         こうかとん画像Surfaceを生成する
         引数 xy：こうかとん画像の初期位置座標タプル
         """
-        self.img = __class__.imgs[(+5, 0)]
+        self.img = __class__.imgs[(+5, 0)] #クラス(birdと同じ)
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
 
@@ -106,8 +106,31 @@ class Bird:
     #     """
     #     if check_bound(self.rct) == (True, True):
     #         self.rct.move_ip(self.vx, self.vy)
-    #         screen.blit(self.img, self.rct)    
+    #         screen.blit(self.img, self.rct)   
+class Beam:
+    """
+    こうかとんが放つビームに関するクラス
+    """
+    def __init__(self, bird:"Bird"):
+        """
+        ビーム画像Surfaceを生成する
+        引数 bird：ビームを放つこうかとん
+        """
+        self.img = pg.image.load(f"fig/beam.png")
+        self.rct = self.img.get_rect()
+        self.rct.centery = bird.rct.centery
+        self.rct.left = bird.rct.right
+        self.vx, self.vy = +5, 0
 
+    def update(self, screen: pg.Surface):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        if check_bound(self.rct) == (True, True):
+            self.rct.move_ip(self.vx, self.vy)
+            screen.blit(self.img, self.rct) 
+        
 
 class Bomb:
     """
@@ -146,17 +169,18 @@ def main():
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
     bomb = Bomb((255, 0, 0), 10)
+    beam = Beam((bird))
     clock = pg.time.Clock()
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-            # if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-            #     # スペースキー押下でBeamクラスのインスタンス生成
-            #     beam = Beam(bird)            
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                # スペースキー押下でBeamクラスのインスタンス生成
+                beam = Beam(bird)            
         screen.blit(bg_img, [0, 0])
-        
+
         if bird.rct.colliderect(bomb.rct):
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
             bird.change_img(8, screen)
@@ -166,7 +190,7 @@ def main():
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        # beam.update(screen)   
+        beam.update(screen)
         bomb.update(screen)
         pg.display.update()
         tmr += 1
