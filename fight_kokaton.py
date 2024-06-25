@@ -149,7 +149,6 @@ class Score:
     def __init__(self):
         """
         フォントを生成する
-        sum:スコア
         """
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
         self.img = self.fonto.render(f"スコア：{Score.sum}", 0,(0, 0, 255))
@@ -164,19 +163,50 @@ class Score:
         screen.blit(self.img, self.center)
 
 
+class Explosion:
+    """
+    爆発に関するクラス
+    """
+    def __init__(self, bombs:"Bomb"):
+        """
+        爆発エフェクトを生成する
+        引数 bombs：ビーム
+        """
+        img1 = pg.image.load(f"fig/explosion.gif")
+        img2 = pg.transform.flip(img1, True, True)
+        self.img_lst = [img1, img2]
+        for i in self.img_lst:
+            self.rct = i.get_rect()
+        self.rct.center = bombs.rct.center
+        self.life = 10
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発を表示する
+        引数 screen：画面Surface
+        """
+        self.life -= 1
+        if self.life > 0:
+            if 0 <= self.life % 10 <= 5:
+                screen.blit(self.img_lst[0], self.rct.center)
+            else:
+                screen.blit(self.img_lst[1], self.rct.center)
+                
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
+    # こうかとんに関する変数
     bird = Bird((300, 200))
     # ビームに関する変数
-    # beam = None
     beams = []
     # スコアに関する変数
     score = Score()
     # 爆弾に関する変数
-    # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for i in range(NUM_OF_BOMBS)]
+    # 爆発に関する変数
+    explosions = []
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -209,11 +239,14 @@ def main():
                         bird.change_img(6, screen)
                         pg.display.update()
                         Score.sum += 1
+                        explosions.append(Explosion(bombs[bm]))  # 爆発のインスタンスをリストに追加 
                         beams[bem] = None
                         bombs[bm] = None
 
+        # それぞれのリストの削減
         bombs = [bm for bm in bombs if bm is not None]
         beams = [bem for bem in beams if bem is not None]
+        explosions = [eps for eps in explosions if eps.life > 0]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -232,6 +265,11 @@ def main():
         for i, bem in enumerate(beams):
             if check_bound(bem.rct) != (True, True):
                 del beams[i]
+
+        # 爆発を更新
+        for i, eps in enumerate(explosions):
+            explosions[i].update(screen )
+        
                 
         pg.display.update()
         tmr += 1 
