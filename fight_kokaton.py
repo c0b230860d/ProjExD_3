@@ -141,12 +141,36 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    """
+    スコアに関するクラス
+    """
+    sum = 0
+    def __init__(self):
+        """
+        フォントを生成する
+        sum:スコア
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.img = self.fonto.render(f"スコア：{Score.sum}", 0,(0, 0, 255))
+        self.center = 100, HEIGHT-50
+
+    def update(self, screen: pg.Surface):
+        """
+        スコアを表示する
+        引数 screen：画面Surface
+        """
+        self.img = self.fonto.render(f"スコア：{Score.sum}", 0,(0, 0, 255))
+        screen.blit(self.img, self.center)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
     beam = None
+    score = Score()
     # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for i in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
@@ -168,7 +192,6 @@ def main():
                     # bird.change_img(8, screen)
                     # pg.display.update()
                     # time.sleep(1)
-
                     font = pg.font.Font(None, 80)
                     txt = font.render("Game Over", True, (255, 0, 0))
                     screen.blit(txt, [WIDTH/2-150, HEIGHT/2])
@@ -183,6 +206,7 @@ def main():
                     # うち落とし時に、こうかとん画像を切り替え
                     bird.change_img(6, screen)
                     pg.display.update()
+                    Score.sum += 1
                     beam = None
                     bombs[bm] = None
 
@@ -197,6 +221,7 @@ def main():
         for i in range(len(bombs)):
             if bombs[i] is not None:
                 bombs[i].update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1 
         clock.tick(50)
