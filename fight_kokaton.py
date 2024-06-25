@@ -175,8 +175,8 @@ class Explosion:
         img1 = pg.image.load(f"fig/explosion.gif")
         img2 = pg.transform.flip(img1, True, True)
         self.img_lst = [img1, img2]
-        for i in self.img_lst:
-            self.rct = i.get_rect()
+        # for i in self.img_lst:
+        self.rct = img1.get_rect()
         self.rct.center = bombs.rct.center
         self.life = 10
 
@@ -269,7 +269,6 @@ def main():
         # 爆発を更新
         for i, eps in enumerate(explosions):
             explosions[i].update(screen )
-        
                 
         pg.display.update()
         tmr += 1 
